@@ -1,0 +1,13 @@
+from chess.figure import Figure
+
+
+class Knight(Figure):
+    def can_move(self, board, row, col, row1, col1):
+        if (row, col) == (row1, col1):
+            return False
+
+        # проверка хода буквой Г
+        return {abs(row1 - row), abs(col1 - col)} == {1, 2}
+
+    def __str__(self):
+        return super().__str__() + 'N'
