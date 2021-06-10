@@ -34,5 +34,9 @@ class Pawn(Figure):
         """Проверяется возможность взятия на проходе"""
         return row + self.direction == row1 and abs(col1 - col) == 1
 
+    @staticmethod
+    def is_pawn():
+        return True
+
     def __str__(self):
         return super().__str__() + 'P'

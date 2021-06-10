@@ -10,7 +10,7 @@ from itertools import product
 
 
 class Board:
-    CHECK_STATE, PAT_STATE, CHECKMATE_STATE = range(3)
+    CHECK_STATE, PAT_STATE, CHECKMATE_STATE, PROMOTE_PAWN_STATE = range(4)
     SIZE = 8
 
     def __init__(self):
@@ -77,7 +77,23 @@ class Board:
         else:
             return False
 
-        return True
+        piece1 = self[row1][col1]
+        king_is_protected = True
+
+        # допускаем ход фигуры для проверки вскрытия короля
+        self[row][col], self[row1][col1] = None, piece
+
+        if piece.is_king():
+            king_row, king_col = row1, col1
+        else:
+            king_row, king_col = self.kings_coords[self.color]
+
+        if self.check(king_row, king_col):
+            king_is_protected = False
+
+        self[row][col], self[row1][col1] = piece, piece1
+
+        return king_is_protected
 
     def check(self, king_row=None, king_col=None) -> bool:
         if not king_row and not king_col:
@@ -110,6 +126,7 @@ class Board:
         """Превращение пешки в ферзя, слона, ладью или коня"""
         if char in ('Q', 'B', 'N', 'R'):
             self[row][col] = None
+
             if char == 'Q':
                 self[row1][col1] = Queen(self.color)
             elif char == 'B':
@@ -118,75 +135,31 @@ class Board:
                 self[row1][col1] = Knight(self.color)
             elif char == 'R':
                 self[row1][col1] = Rook(self.color)
+
             return True
 
         return False
-
-    def castle(self, row, col, row1, col1):
-        # TODO: перенести метод castle в метод короля проверки хода
-        if row != row1 or abs(col - col1) != 2:
-            return False
-        king = self[row][col]
-        if not isinstance(king, King):
-            return False
-        rook_col = 0 if col1 == 2 else 7
-        rook = self[row][rook_col]
-        if not isinstance(rook, Rook) or isinstance(rook, Queen):
-            return False
-        if rook.moved or king.can_castle:
-            return False
-        if rook_col == 7 and self[row][5:7] != [None, None]:
-            return False
-        if rook_col == 0 and self[row][1:4] != [None, None, None]:
-            return False
-        if self.check(row, col):
-            return False
-        # наконец можно рокироваться
-        self[row][col], self[row][col1] = None, king
-        if rook_col == 7:
-            self[row][rook_col], self[row][5] = None, rook
-        else:
-            self[row][rook_col], self[row][3] = None, rook
-        king.can_castle, rook.moved = True, True
-        self.kings_coords[self.color] = row, col1
-        self.color = opponent(self.color)
-        return True
 
     def move(self, row, col, row1, col1):
         """Переместить фигуру из точки (row, col) в точку (row1, col1).
         Если перемещение возможно, метод выполнит его и вернёт True.
         Если нет - вернёт False"""
         piece = self[row][col]
-        piece1 = self[row1][col1]
 
         if self.can_move(row, col, row1, col1):
-            self[row][col], self[row1][col1] = None, piece
-
-            if isinstance(piece, King):
-                king_row, king_col = row1, col1
-            else:
-                king_row, king_col = self.kings_coords[self.color]
-
-            if self.check(king_row, king_col):
-                self[row][col], self[row1][col1] = piece, piece1
-                return False
-
             # если передвинули ладью или короля, то помечаем,
-            # что эта фигура уже двигалась и рокировка с этой фигурой невозможна
-            if isinstance(piece, Rook) and not isinstance(piece, Queen):
+            # что эта фигура уже двигалась и рокировка с ней невозможна
+            if piece.is_rook() or piece.is_king():
                 piece.moved = True
-            elif isinstance(piece, King):
-                piece.moved = True
-                # перезаписываем текущие координаты короля
-                self.kings_coords[self.color] = row1, col1
+                if piece.is_king():
+                    # перезаписываем текущие координаты короля
+                    self.kings_coords[self.color] = row1, col1
 
-            if (
-                    isinstance(piece, Pawn)
-                    and (piece.color == BLACK and row1 == 0
-                         or piece.color == WHITE and row1 == 7)
-            ):
-                pass
-                # TODO: отправить статус, что возможно провести пешку
+            if (piece.is_pawn() and (
+                    piece.color == BLACK and row1 == 0
+                    or piece.color == WHITE and row1 == 7
+            )):
+                return self.PROMOTE_PAWN_STATE
 
             self.color = opponent(self.color)
 

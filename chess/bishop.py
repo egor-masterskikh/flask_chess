@@ -8,7 +8,7 @@ class Bishop(Figure):
             return False
 
         if abs(row - row1) != abs(col - col1):
-            return False
+            return False  # слон двигается только по диагонали
 
         step_row = int(copysign(1, row1 - row))
         step_col = int(copysign(1, col1 - col))
@@ -18,6 +18,10 @@ class Bishop(Figure):
             if board[row + step_row * i][col + step_col * i] is not None:
                 return False
 
+        return True
+
+    @staticmethod
+    def is_bishop():
         return True
 
     def __str__(self):
