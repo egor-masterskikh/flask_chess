@@ -1,6 +1,5 @@
 from chess.figure import Figure
 from chess.colors import WHITE
-from chess.board import Board
 
 
 class Pawn(Figure):
@@ -9,7 +8,7 @@ class Pawn(Figure):
         self.direction = 1 if self.color == WHITE else -1
         self.start_row = 1 if self.color == WHITE else 6
 
-    def can_move(self, board: Board, row, col, row1, col1):
+    def can_move(self, board, row, col, row1, col1):
         if col != col1:
             return False
 

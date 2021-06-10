@@ -1,4 +1,3 @@
-from chess.board import Board
 from chess.figure import Figure
 from math import copysign
 
@@ -8,7 +7,7 @@ class Rook(Figure):
         self.moved = False
         super().__init__(color)
 
-    def can_move(self, board: Board, row, col, row1, col1):
+    def can_move(self, board, row, col, row1, col1):
         if not (row == row1 or col == col1):
             return False
 

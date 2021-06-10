@@ -40,10 +40,17 @@ class Board:
         return self.board[item]
 
     def __str__(self):
-        fmt_board = '-' * self.SIZE * 4
+        sep_line = '-' * self.SIZE * 3
+        fmt_board = [sep_line]
+
         for i in range(self.SIZE):
-            fmt_board += ''.join(['|' + self.cell(i, j) + '|' for j in range(self.SIZE)])
-        fmt_board += '-' * self.SIZE * 4
+            fmt_board.append(''.join(
+                ['|' + self.cell(i, j) for j in range(self.SIZE)] + ['|']
+            ))
+            fmt_board.append(sep_line)
+
+        fmt_board = '\n'.join(fmt_board)
+
         return fmt_board
 
     def cell(self, row, col):
@@ -184,6 +191,8 @@ class Board:
             )):
                 return self.PROMOTE_PAWN_STATE
 
+            # делаем ход
+            self[row][col], self[row1][col1] = None, piece
             self.color = opponent(self.color)
 
             if self.checkmate():

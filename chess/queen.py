@@ -1,5 +1,6 @@
-from bishop import Bishop
-from rook import Rook
+from chess.bishop import Bishop
+from chess.rook import Rook
+from chess.figure import Figure
 
 
 class Queen(Rook, Bishop):
@@ -22,4 +23,4 @@ class Queen(Rook, Bishop):
         return False
 
     def __str__(self):
-        return super().__str__() + 'Q'
+        return Figure.__str__(self) + 'Q'

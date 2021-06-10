@@ -1,4 +1,3 @@
-from chess.board import Board
 from chess.figure import Figure
 
 
@@ -17,7 +16,7 @@ class King(Figure):
 
         return False
 
-    def can_castle(self, board: Board, row, col, row1, col1):
+    def can_castle(self, board, row, col, row1, col1):
         if row != row1 or abs(col - col1) != 2:
             return False
 
