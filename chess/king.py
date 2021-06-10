@@ -8,20 +8,26 @@ class King(Figure):
         super().__init__(color)
 
     def can_move(self, board, row, col, row1, col1):
-        if (row, col) == (row1, col1):
-            return False
-
         # проверка хода короля максимум на один шаг по всем осям
-        if {abs(row1 - row), abs(col1 - col)} - {0, 1}:
-            return False
+        if not {abs(row1 - row), abs(col1 - col)} - {0, 1}:
+            return True
 
-        return True
+        if self.can_castle(board, row, col, row1, col1):
+            return True
+
+        return False
 
     def can_castle(self, board: Board, row, col, row1, col1):
         if row != row1 or abs(col - col1) != 2:
             return False
 
-        rook_col = 0 if col1 == 2 else 7
+        if col1 == 2:
+            rook_col = 0
+            rook_col1 = 3
+        else:  # elif col1 == 6:
+            rook_col = 7
+            rook_col1 = 5
+
         rook = board[row][rook_col]
 
         if not rook.is_rook():
@@ -36,10 +42,7 @@ class King(Figure):
         if rook_col == 0 and board[row][1:4] != [None] * 3:
             return False
 
-        if board.check(row, col):
-            return False
-
-        return True
+        return rook_col, rook_col1
 
     @staticmethod
     def is_king():

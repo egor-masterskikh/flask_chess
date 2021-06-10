@@ -10,7 +10,13 @@ from itertools import product
 
 
 class Board:
-    CHECK_STATE, PAT_STATE, CHECKMATE_STATE, PROMOTE_PAWN_STATE = range(4)
+    SUCCESS_STATE = 0
+    FAIL_STATE = 1
+    CHECK_STATE = 2
+    PAT_STATE = 3
+    CHECKMATE_STATE = 4
+    PROMOTE_PAWN_STATE = 5
+
     SIZE = 8
 
     def __init__(self):
@@ -53,7 +59,7 @@ class Board:
             return False  # нельзя пойти вне доски
 
         if (row, col) == (row1, col1):
-            return False
+            return False  # нельзя пойти в ту же клетку
 
         piece = self[row][col]
 
@@ -85,6 +91,15 @@ class Board:
 
         if piece.is_king():
             king_row, king_col = row1, col1
+
+            # если король хочет сделать рокировку,
+            # то возвращаем ему начальный и конечный индексы колонки ладьи
+            rook_cols = piece.can_castle(self, row, col, row1, col1)
+            if rook_cols:
+                rook_col, rook_col1 = rook_cols
+                rook = self[row][rook_col]
+                self[row][rook_col], self[row][rook_col1] = None, rook
+
         else:
             king_row, king_col = self.kings_coords[self.color]
 
@@ -92,6 +107,8 @@ class Board:
             king_is_protected = False
 
         self[row][col], self[row1][col1] = piece, piece1
+
+        # TODO: в случае рокировки надо поставить ладью на место
 
         return king_is_protected
 
@@ -144,18 +161,18 @@ class Board:
         """Переместить фигуру из точки (row, col) в точку (row1, col1).
         Если перемещение возможно, метод выполнит его и вернёт True.
         Если нет - вернёт False"""
-        piece = self[row][col]
-
         if self.can_move(row, col, row1, col1):
+            piece = self[row][col]
             # если передвинули ладью или короля, то помечаем,
             # что эта фигура уже двигалась и рокировка с ней невозможна
             if piece.is_rook() or piece.is_king():
                 piece.moved = True
                 if piece.is_king():
+                    # TODO: в случае рокировки ставим ладью на своё место
                     # перезаписываем текущие координаты короля
                     self.kings_coords[self.color] = row1, col1
 
-            if (piece.is_pawn() and (
+            elif (piece.is_pawn() and (
                     piece.color == BLACK and row1 == 0
                     or piece.color == WHITE and row1 == 7
             )):
@@ -170,6 +187,6 @@ class Board:
             elif self.check():
                 return self.CHECK_STATE
 
-            return True
+            return self.SUCCESS_STATE
 
-        return False
+        return self.FAIL_STATE

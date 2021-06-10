@@ -9,9 +9,6 @@ class Rook(Figure):
         super().__init__(color)
 
     def can_move(self, board: Board, row, col, row1, col1):
-        if (row, col) == (row1, col1):
-            return False
-
         if not (row == row1 or col == col1):
             return False
 

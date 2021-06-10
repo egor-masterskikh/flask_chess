@@ -4,9 +4,6 @@ from math import copysign
 
 class Bishop(Figure):
     def can_move(self, board, row, col, row1, col1):
-        if (row, col) == (row1, col1):
-            return False
-
         if abs(row - row1) != abs(col - col1):
             return False  # слон двигается только по диагонали
 

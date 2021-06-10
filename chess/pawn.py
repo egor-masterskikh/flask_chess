@@ -10,9 +10,6 @@ class Pawn(Figure):
         self.start_row = 1 if self.color == WHITE else 6
 
     def can_move(self, board: Board, row, col, row1, col1):
-        if (row, col) == (row1, col1):
-            return False
-
         if col != col1:
             return False
 
