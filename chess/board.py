@@ -89,6 +89,11 @@ class Board:
         # допускаем ход фигуры для проверки вскрытия короля
         self[row][col], self[row1][col1] = None, piece
 
+        # эти переменные используются в случае рокировки
+        rook_col = None
+        rook_col1 = None
+        rook = None
+
         if piece.is_king():
             king_row, king_col = row1, col1
 
@@ -108,7 +113,8 @@ class Board:
 
         self[row][col], self[row1][col1] = piece, piece1
 
-        # TODO: в случае рокировки надо поставить ладью на место
+        if piece.is_king() and rook:
+            self[row][rook_col], self[row][rook_col1] = rook, None
 
         return king_is_protected
 
@@ -168,7 +174,7 @@ class Board:
             if piece.is_rook() or piece.is_king():
                 piece.moved = True
                 if piece.is_king():
-                    # TODO: в случае рокировки ставим ладью на своё место
+                    # TODO: в случае рокировки ставим ладью на новое место
                     # перезаписываем текущие координаты короля
                     self.kings_coords[self.color] = row1, col1
 
