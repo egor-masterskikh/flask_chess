@@ -33,11 +33,9 @@ class Board:
             [Rook(BLACK), Knight(BLACK), Bishop(BLACK), Queen(BLACK),
              King(BLACK), Bishop(BLACK), Knight(BLACK), Rook(BLACK)]
         ]
-        # координаты королей нужны для отслеживания шаха, мата и пата
-        self.kings_coords = {BLACK: (7, 4), WHITE: (0, 4)}
 
-    def __getitem__(self, item):
-        return self.board[item]
+    def __getitem__(self, row):
+        return self.board[row]
 
     def __str__(self):
         sep_line = '-' * self.SIZE * 3
@@ -53,13 +51,24 @@ class Board:
 
         return fmt_board
 
-    def cell(self, row, col):
+    def cell(self, row, col) -> str:
         """
         Возвращает строку из двух символов.
         Если в клетке (row, col) находится фигура, символы цвета и фигуры.
         Если клетка пуста, то два пробела.
+        :return: str
         """
         return str(self[row][col] or '  ')
+
+    def get_king_coords(self) -> tuple:
+        """
+        Возвращает текущие координаты короля текущего цвета
+        :return: tuple
+        """
+        for row, col in product(range(self.SIZE), repeat=2):
+            piece = self[row][col]
+            if type(piece) == King and piece.color == self.color:
+                return row, col
 
     def can_move(self, row, col, row1, col1) -> bool:
         if {row, col, row1, col1} - set(range(self.SIZE)):
@@ -91,7 +100,6 @@ class Board:
             return False
 
         piece1 = self[row1][col1]
-        king_is_protected = True
 
         # допускаем ход фигуры для проверки вскрытия короля
         self[row][col], self[row1][col1] = None, piece
@@ -102,8 +110,6 @@ class Board:
         castled_rook = None
 
         if type(piece) == King:
-            king_row, king_col = row1, col1
-
             # в случае рокировки возвращаем начальный и конечный индексы колонки ладьи
             castled_rook_cols = piece.can_castle(self, row, col, row1, col1)
             if castled_rook_cols:
@@ -115,11 +121,10 @@ class Board:
                     None, castled_rook_col1
                 )
 
-        else:
-            king_row, king_col = self.kings_coords[self.color]
-
-        if self.check(king_row, king_col):
+        if self.check():
             king_is_protected = False
+        else:
+            king_is_protected = True
 
         # ставим фигуру обратно
         self[row][col], self[row1][col1] = piece, piece1
@@ -130,27 +135,33 @@ class Board:
 
         return king_is_protected
 
-    def check(self, king_row=None, king_col=None) -> bool:
-        if not king_row and not king_col:
-            king_row, king_col = self.kings_coords[self.color]
-
-        for i, j in product(range(self.SIZE), repeat=2):
-            p = self[i][j]
+    def check(self) -> bool:
+        """
+        Проверяет нохождение короля текущего цвета под шахом
+        :return: bool
+        """
+        king_row, king_col = self.get_king_coords()
+        for row, col in product(range(self.SIZE), repeat=2):
+            piece = self[row][col]
             if (
-                    isinstance(p, Figure)
-                    and p.color == opponent(self.color)
-                    and p.can_attack(self, i, j, king_row, king_col)
+                    isinstance(piece, Figure)
+                    and piece.color == opponent(self.color)
+                    and piece.can_attack(self, row, col, king_row, king_col)
             ):
                 return True
 
         return False
 
     def pat(self) -> bool:
-        for i, j in product(range(self.SIZE), repeat=2):
-            piece = self[i][j]
+        """
+        Проверяет, может ли хоть одна фигура текущего цвета сделать ход
+        :return: bool
+        """
+        for row, col in product(range(self.SIZE), repeat=2):
+            piece = self[row][col]
             if isinstance(piece, Figure) and piece.color == self.color:
-                for i1, j1 in product(range(self.SIZE), repeat=2):
-                    if self.can_move(i, j, i1, j1):
+                for row1, col1 in product(range(self.SIZE), repeat=2):
+                    if self.can_move(row, col, row1, col1):
                         return False
         return True
 
@@ -158,22 +169,23 @@ class Board:
         return self.check() and self.pat()
 
     def promote_pawn(self, row, col, row1, col1, char):
-        """Превращение пешки в ферзя, слона, ладью или коня"""
-        if char in ('Q', 'B', 'N', 'R'):
-            self[row][col] = None
+        """
+        Превращает пешку в ферзя, слона, ладью или коня
+        """
+        if char == 'Q':
+            piece = Queen(self.color)
+        elif char == 'B':
+            piece = Bishop(self.color)
+        elif char == 'N':
+            piece = Knight(self.color)
+        elif char == 'R':
+            piece = Rook(self.color)
+        else:
+            return False
 
-            if char == 'Q':
-                self[row1][col1] = Queen(self.color)
-            elif char == 'B':
-                self[row1][col1] = Bishop(self.color)
-            elif char == 'N':
-                self[row1][col1] = Knight(self.color)
-            elif char == 'R':
-                self[row1][col1] = Rook(self.color)
+        self[row][col], self[row1][col1] = None, piece
 
-            return True
-
-        return False
+        return True
 
     def move(self, row, col, row1, col1):
         """
@@ -183,23 +195,22 @@ class Board:
         """
         if self.can_move(row, col, row1, col1):
             piece = self[row][col]
-            # если передвинули ладью или короля, то помечаем,
-            # что эта фигура уже двигалась и рокировка с ней невозможна
-            if type(piece) in (Rook, King):
-                piece.moved = True
-                if type(piece) == King:
-                    # TODO: в случае рокировки ставим ладью на новое место
-                    # перезаписываем текущие координаты короля
-                    self.kings_coords[self.color] = row1, col1
-
-            elif (type(piece) == Pawn and (
-                    piece.color == BLACK and row1 == 0
-                    or piece.color == WHITE and row1 == 7
-            )):
-                return self.PROMOTE_PAWN_STATE
 
             # делаем ход
             self[row][col], self[row1][col1] = None, piece
+
+            if type(piece) in (Rook, King):
+                # помечаем, что рокировка с этой фигурой невозможна
+                piece.moved = True
+                if type(piece) == King:
+                    # TODO: в случае рокировки ставим также ладью на новое место
+                    pass
+
+            elif type(piece) == Pawn:
+                if (piece.color == BLACK and row1 == 0
+                        or piece.color == WHITE and row1 == 7):
+                    return self.PROMOTE_PAWN_STATE
+
             self.color = opponent(self.color)
 
             if self.checkmate():
