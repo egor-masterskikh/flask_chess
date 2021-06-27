@@ -118,7 +118,7 @@ class Board:
 
                 # помимо хода короля допускаем также ход ладьи
                 self[row][castled_rook_col], self[row][castled_rook_col1] = (
-                    None, castled_rook_col1
+                    None, castled_rook
                 )
 
         if self.check():
@@ -203,8 +203,17 @@ class Board:
                 # помечаем, что рокировка с этой фигурой невозможна
                 piece.moved = True
                 if type(piece) == King:
-                    # TODO: в случае рокировки ставим также ладью на новое место
-                    pass
+                    # в случае рокировки возвращаем
+                    # начальный и конечный индексы колонки ладьи
+                    castled_rook_cols = piece.can_castle(self, row, col, row1, col1)
+                    if castled_rook_cols:
+                        castled_rook_col, castled_rook_col1 = castled_rook_cols
+                        castled_rook = self[row][castled_rook_col]
+
+                        # в случае рокировки делаем ход ещё и ладьёй
+                        self[row][castled_rook_col], self[row][castled_rook_col1] = (
+                            None, castled_rook
+                        )
 
             elif type(piece) == Pawn:
                 if (piece.color == BLACK and row1 == 0
