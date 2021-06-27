@@ -25,9 +25,5 @@ class Rook(Figure):
 
         return True
 
-    @staticmethod
-    def is_rook():
-        return True
-
     def __str__(self):
         return super().__str__() + 'R'

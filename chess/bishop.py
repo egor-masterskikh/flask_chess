@@ -17,9 +17,5 @@ class Bishop(Figure):
 
         return True
 
-    @staticmethod
-    def is_bishop():
-        return True
-
     def __str__(self):
         return super().__str__() + 'B'

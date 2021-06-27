@@ -1,4 +1,5 @@
 from chess.figure import Figure
+from chess.rook import Rook
 
 
 class King(Figure):
@@ -29,7 +30,7 @@ class King(Figure):
 
         rook = board[row][rook_col]
 
-        if not rook.is_rook():
+        if type(rook) != Rook:
             return False
 
         if rook.moved or self.moved:
@@ -42,10 +43,6 @@ class King(Figure):
             return False
 
         return rook_col, rook_col1
-
-    @staticmethod
-    def is_king():
-        return True
 
     def __str__(self):
         return super().__str__() + 'K'

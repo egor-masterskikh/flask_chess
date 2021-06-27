@@ -97,20 +97,22 @@ class Board:
         self[row][col], self[row1][col1] = None, piece
 
         # эти переменные используются в случае рокировки
-        rook_col = None
-        rook_col1 = None
-        rook = None
+        castled_rook_col = None
+        castled_rook_col1 = None
+        castled_rook = None
 
-        if piece.is_king():
+        if type(piece) == King:
             king_row, king_col = row1, col1
 
             # если король хочет сделать рокировку,
             # то возвращаем ему начальный и конечный индексы колонки ладьи
-            rook_cols = piece.can_castle(self, row, col, row1, col1)
-            if rook_cols:
-                rook_col, rook_col1 = rook_cols
-                rook = self[row][rook_col]
-                self[row][rook_col], self[row][rook_col1] = None, rook
+            castled_rook_cols = piece.can_castle(self, row, col, row1, col1)
+            if castled_rook_cols:
+                castled_rook_col, castled_rook_col1 = castled_rook_cols
+                castled_rook = self[row][castled_rook_col]
+                self[row][castled_rook_col], self[row][castled_rook_col1] = (
+                    None, castled_rook_col1
+                )
 
         else:
             king_row, king_col = self.kings_coords[self.color]
@@ -118,10 +120,12 @@ class Board:
         if self.check(king_row, king_col):
             king_is_protected = False
 
+        # ставим фигуру (или фигуры) обратно
         self[row][col], self[row1][col1] = piece, piece1
 
-        if piece.is_king() and rook:
-            self[row][rook_col], self[row][rook_col1] = rook, None
+        # если это была рокировка, то помимо короля ставим обратно и ладью
+        if castled_rook:
+            self[row][castled_rook_col], self[row][castled_rook_col1] = castled_rook, None
 
         return king_is_protected
 
@@ -171,21 +175,23 @@ class Board:
         return False
 
     def move(self, row, col, row1, col1):
-        """Переместить фигуру из точки (row, col) в точку (row1, col1).
-        Если перемещение возможно, метод выполнит его и вернёт True.
-        Если нет - вернёт False"""
+        """
+        Переместить фигуру из точки (row, col) в точку (row1, col1).
+        Если перемещение возможно, метод выполнит его и вернёт SUCCESS_STATE.
+        Если нет - вернёт FAIL_STATE
+        """
         if self.can_move(row, col, row1, col1):
             piece = self[row][col]
             # если передвинули ладью или короля, то помечаем,
             # что эта фигура уже двигалась и рокировка с ней невозможна
-            if piece.is_rook() or piece.is_king():
+            if type(piece) in (Rook, King):
                 piece.moved = True
-                if piece.is_king():
+                if type(piece) == King:
                     # TODO: в случае рокировки ставим ладью на новое место
                     # перезаписываем текущие координаты короля
                     self.kings_coords[self.color] = row1, col1
 
-            elif (piece.is_pawn() and (
+            elif (type(piece) == Pawn and (
                     piece.color == BLACK and row1 == 0
                     or piece.color == WHITE and row1 == 7
             )):
