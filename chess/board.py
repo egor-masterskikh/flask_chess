@@ -104,12 +104,13 @@ class Board:
         if type(piece) == King:
             king_row, king_col = row1, col1
 
-            # если король хочет сделать рокировку,
-            # то возвращаем ему начальный и конечный индексы колонки ладьи
+            # в случае рокировки возвращаем начальный и конечный индексы колонки ладьи
             castled_rook_cols = piece.can_castle(self, row, col, row1, col1)
             if castled_rook_cols:
                 castled_rook_col, castled_rook_col1 = castled_rook_cols
                 castled_rook = self[row][castled_rook_col]
+
+                # помимо хода короля допускаем также ход ладьи
                 self[row][castled_rook_col], self[row][castled_rook_col1] = (
                     None, castled_rook_col1
                 )
@@ -120,10 +121,10 @@ class Board:
         if self.check(king_row, king_col):
             king_is_protected = False
 
-        # ставим фигуру (или фигуры) обратно
+        # ставим фигуру обратно
         self[row][col], self[row1][col1] = piece, piece1
 
-        # если это была рокировка, то помимо короля ставим обратно и ладью
+        # если мы допустили рокировку, то помимо короля ставим обратно и ладью
         if castled_rook:
             self[row][castled_rook_col], self[row][castled_rook_col1] = castled_rook, None
 
