@@ -1,13 +1,16 @@
 from flask import Flask, render_template
-from itertools import product
+from chess.board import Board
+from jinja2.filters import FILTERS
 
 app = Flask(__name__)
+board = Board()
+
+FILTERS["enumerate"] = enumerate
 
 
 @app.route("/game")
 def game():
-    coords = product(range(8), repeat=2)
-    return render_template("game.html", coords=coords)
+    return render_template("game.html", board=board)
 
 
 if __name__ == '__main__':

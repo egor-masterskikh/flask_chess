@@ -11,9 +11,14 @@
 <body>
 <div class="container">
     <div class="board">
-        {% for row_num, col_num in coords %}
-            <div class="square" id="{{ row_num }}{{ col_num }}">
-            </div>
+        {% for i, row in board|enumerate %}
+            {% for j, el in row|enumerate %}
+                {% if not (i + j) % 2 %}
+                    <div class="square square-black {{ el }}" id="{{ i }}{{ j }}"></div>
+                {% else %}
+                    <div class="square square-white {{ el }}" id="{{ i }}{{ j }}"></div>
+                {% endif %}
+            {% endfor %}
         {% endfor %}
     </div>
 </div>

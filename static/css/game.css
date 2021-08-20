@@ -37,8 +37,14 @@ body {
 }
 
 .square {
-    background-color: aquamarine;
-    border: 1px solid black;
     width: 100%;
     height: 100%;
+}
+
+.square-black {
+    background-color: #779455;
+}
+
+.square-white {
+    background-color: #ebebd0;
 }
