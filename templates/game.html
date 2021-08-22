@@ -13,11 +13,17 @@
     <div class="board">
         {% for i, row in board|enumerate %}
             {% for j, el in row|enumerate %}
-                {% if not (i + j) % 2 %}
-                    <div class="square square-black {{ el }}" id="{{ i }}{{ j }}"></div>
+                {% if (i + j) % 2 %}
+                    {% set color = "square-white" %}
                 {% else %}
-                    <div class="square square-white {{ el }}" id="{{ i }}{{ j }}"></div>
+                    {% set color = "square-black" %}
                 {% endif %}
+
+                <div class="square {{ color }}" id="{{ i }}{{ j }}">
+                    {% if el %}
+                        <div class="figure {{ el }}"></div>
+                    {% endif %}
+                </div>
             {% endfor %}
         {% endfor %}
     </div>
