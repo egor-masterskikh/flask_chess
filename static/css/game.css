@@ -57,3 +57,7 @@ body {
     background-size: contain;
     background-position: center;
 }
+
+.wK {
+    background-image: url("../svg/wk.svg")
+}
