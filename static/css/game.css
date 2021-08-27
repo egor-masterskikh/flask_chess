@@ -59,5 +59,17 @@ body {
 }
 
 .wK {
-    background-image: url("../svg/wk.svg")
+    background-image: url(../svg/wk.svg);
+}
+
+.wQ {
+    background-image: url(../svg/wq.svg);
+}
+
+.wR {
+    background-image: url(../svg/wr.svg);
+}
+
+.wB {
+    background-image: url(../svg/wb.svg);
 }
