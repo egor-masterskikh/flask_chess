@@ -57,6 +57,7 @@ body {
     background-origin: content-box;
     background-size: contain;
     background-position: center;
+    cursor: grab;
 }
 
 .wK {

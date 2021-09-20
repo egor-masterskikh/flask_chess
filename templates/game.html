@@ -19,12 +19,9 @@
                     {% set color = "square-black" %}
                 {% endif %}
 
-                <div class="square {{ color }}" id="{{ i }}{{ j }}"
-                     ondragover="dragoverHandler(event)" ondrop="dropHandler(event)">
+                <div class="square {{ color }}" id="{{ i }}{{ j }}">
                     {% if el %}
-                        <div class="figure {{ el }}"
-                             ondragstart="dragstartHandler(event)" draggable="true">
-                        </div>
+                        <div class="figure {{ el }}"></div>
                     {% endif %}
                 </div>
             {% endfor %}
