@@ -1,3 +1,9 @@
+const socket = io()
+
+socket.on("connect", function () {
+    socket.emit("my event", {data: "I'm connected!"})
+})
+
 const figures = document.querySelectorAll(".figure")
 
 figures.forEach(f => {
