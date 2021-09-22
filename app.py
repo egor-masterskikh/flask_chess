@@ -18,9 +18,15 @@ def game():
     return render_template("game.html", board=board)
 
 
-@socketio.on("my event")
-def my_event_handler(message):
-    print(f"received message: {message['data']}")
+@socketio.on("move")
+def move_handler(data):
+    row, col = map(int, data["from"])
+    row1, col1 = map(int, data["to"])
+    state = board.move(row, col, row1, col1)
+    if state == board.SUCCESS_STATE:
+        socketio.emit("success", data)
+    elif state == board.FAIL_STATE:
+        socketio.emit("fail", data)
 
 
 if __name__ == '__main__':
